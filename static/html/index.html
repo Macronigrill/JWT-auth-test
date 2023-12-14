@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>JWT auth Test</title>
+    <link rel="stylesheet" href="/css/styles.css">
+    <script src="/js/index.js"></script>
+</head>
+<body>
+    <div class="userInput">
+        <div class="login" id="login">
+            <form id="authForm">
+                <label for="username">Username:</label>
+                <input type="text" name="username" id="username">
+                <label for="password">Password</label>
+                <input type="text" name="password" id="password">
+                <input type="button" value="Log In" onclick="auth('login')">
+                <input type="button" value="Register" onclick="auth('register')">
+            </form>
+        </div>
+        <div class="postInput hidden" id="postInput">
+            <p class="inline">logged in as </p>
+            <input type="button"  value="Log Out" onclick="auth(`logout`)">
+        </div>
+    </div>
+    <div class="posts">
+        <div class="post">
+            <p class="postAuthor"></p>
+            <p class="postTitle"></p>
+            <p class="postContent"></p>
+        </div>
+    </div>
+</body>
+</html>
