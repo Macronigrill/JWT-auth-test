@@ -14,8 +14,24 @@ const mysql = require("mysql");
 const cookieParser = require("cookie-parser");
 const jwt = require("jsonwebtoken");
 const path = require("path");
+const crypto = require("crypto");
 
 //-------------------------------------------------------------------[BASIC SERVER SETUP]--------------------------------------------------------------------------------------------------
+
+//Checking for presense of secret key, and generating key if not present
+if(!process.env.JWT_SECRET_KEY || process.env.JWT_SECRET_KEY == ""){
+    console.log("No Secret key found");
+    if(process.env.GENERATE_KEY == true){
+        newKey = crypto.randomBytes(64).toString("hex");
+        process.env.JWT_SECRET_KEY = newKey;
+        console.log("Secret key generated");
+    } else {
+        console.log("Please enter secret key");
+        return;
+    }
+} else {
+    console.log("Secret key found")
+}
 
 //creating connection pool to the database, and testing database connection
 const pool = mysql.createPool({
@@ -52,6 +68,7 @@ const checkAuthCookie = (req,res,next) => {
         const cookieContent = req.cookies[targetCookieName];
         jwt.verify(cookieContent, process.env.JWT_SECRET_KEY, (err,user) =>{
             if (err) {
+                res.clearCookie("authToken");
                 next();
             } else {
                 req.user = user;
