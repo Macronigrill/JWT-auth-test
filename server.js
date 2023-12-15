@@ -59,7 +59,7 @@ const connection = pool.getConnection((err, connection) => {
     };
 });
 
-//creating middleware to check for authorisation
+//creating custom middleware function to check for authorisation
 const checkAuthCookie = (req,res,next) => {
     const targetCookieName = "authToken";
     if (!req.cookies[targetCookieName]) {
