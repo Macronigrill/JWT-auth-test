@@ -14,7 +14,7 @@
                 <label for="username">Username:</label>
                 <input type="text" name="username" id="username">
                 <label for="password">Password</label>
-                <input type="text" name="password" id="password">
+                <input type="password" name="password" id="password">
                 <input type="button" value="Log In" onclick="auth('login')">
                 <input type="button" value="Register" onclick="auth('register')">
             </form>
@@ -22,9 +22,14 @@
         <div class="postInput hidden" id="postInput">
             <p class="inline">logged in as </p>
             <input type="button"  value="Log Out" onclick="auth(`logout`)">
+            <form id="postForm"></form>    
+                <textarea id="titleInput" name="postTitle" form="postForm" cols="30" rows="1" placeholder="Post title..."></textarea>
+                <textarea id="contentInput"name="postContent" form="postForm" cols="50" rows="15" placeholder="Make a post!"></textarea>
+                <input type="button" value="Post" onclick="createPost()">
+            </form>
         </div>
     </div>
-    <div class="posts">
+    <div class="posts" id="postContainer">
         <div class="post">
             <p class="postAuthor"></p>
             <p class="postTitle"></p>

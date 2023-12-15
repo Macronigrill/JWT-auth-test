@@ -1,9 +1,12 @@
+
 document.addEventListener("DOMContentLoaded",init);
 
 function init() {
     const login = document.getElementById("login");
     const postInput = document.getElementById("postInput");
-    const postTemplate = document.querySelectorAll("div.post")[0];
+    const postContainer = document.getElementById("postContainer");
+    const postTemplate = postContainer.querySelectorAll("div.post")[0].cloneNode(true);
+    postContainer.querySelectorAll("div.post")[0].remove();
     
     fetch("/user/checkauth")
     .then(response => response.json())
@@ -25,7 +28,6 @@ function init() {
 };
 
 function constructPosts(postTemplate,posts){
-    console.log("test");
     posts.forEach(postData => {
         post = postTemplate.cloneNode(true);
         author = post.querySelectorAll("p")[0];
@@ -34,20 +36,39 @@ function constructPosts(postTemplate,posts){
         author.textContent = "posted by " + postData.author;
         title.textContent = postData.post_title;
         content.textContent = postData.post_content;
-        postTemplate.parentElement.appendChild(post);
+        postContainer.appendChild(post);
     });
-}
+};
 
+function createPost(){
+    const form = document.getElementById("postForm");
+    const postData = new FormData(form);
+    const request = JSON.stringify(Object.fromEntries(postData));
+    console.log(request);
+    fetch("/posts/create",{
+        method: "POST",
+        headers: {"Content-Type":"application/json"},
+        body: request
+    })
+    .then(response => response.text())
+    .then(data => {console.log(data)})
+    .catch(error => {console.log(error)});
+    location.reload();
+};
 
-function auth(mode){
+function auth(mode,body){
     const form = document.getElementById("authForm");
-    const authData = new FormData(form);
-    const request = JSON.stringify(Object.fromEntries(authData));
+    if(!body) {    
+        const authData = new FormData(form);
+        var request = JSON.stringify(Object.fromEntries(authData));
+        console.log(body);
+    } else {
+        var request = body;
+    } 
     var method = "POST";
     if(mode == "logout"){
         method = "DELETE"
     };
-    console.log(request);
     
     const url = "/user/" + mode;
     fetch(url,{
@@ -59,22 +80,18 @@ function auth(mode){
     })
     .then(response => {
         response.text()
-        if(mode == "register" && response.ok){
-            fetch("/user/login",{
-                method:"POST",
-                headers: {
-                    "Content-Type": "application/json"
-                },
-                body: request
-            })
-            .then(response => response.text())
-        };
     })
     .then(data => {
         console.log(data);
-        location.reload();
+        if(mode == "register"){
+            auth("login",request);
+        } else {
+            location.reload()
+        };
     })
     .catch(error => {
         console.log("Error: ",error);
     });
+
 };
+

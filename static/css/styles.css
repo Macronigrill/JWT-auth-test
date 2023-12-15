@@ -21,6 +21,8 @@ body{
 
 .post{
     max-width: 60%;
+    min-width: 20rem;
+    margin-bottom: 1.5rem;
 }
 .postAuthor{
     font-size: small;
@@ -29,6 +31,7 @@ body{
     font-size: larger;
     margin-bottom: 0.2rem;
 }
-.postcontent {
-    margin-bottom: 1rem;
+textarea{
+    display: block;
+    resize: none;
 }

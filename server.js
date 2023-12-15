@@ -150,8 +150,6 @@ app.post("/user/register",async(req,res)=>{
 
 //Endpoint handling user authentication
 app.post("/user/login",async (req,res)=>{
-    console.log(req.body);
-    console.log(req.user);
     try {
         //Validating Data sent by user
         if (!req.body || !req.body.username || !req.body.password) {
@@ -247,6 +245,7 @@ app.get("/user/checkauth", async (req,res)=>{
         res.status(401).send();
     }
 })
+
 //Post Handling-------------------------------------------------------------------------------------------------
 
 //Endpoint handling post creation
@@ -258,12 +257,15 @@ app.post("/posts/create",async (req,res)=>{
     };
     if(!req.body || !req.body.postTitle || !req.body.postContent) {
         res.status(400).send("Data Incomplete");
+        return;
     }
     if(req.body.postTitle >= 100) {
         res.status(400).send("Title too long");
+        return;
     }
     if(req.body.postContent >= 500) {
         res.status(400).send("Content too long");
+        return;
     }
     try {
         const connection = await new Promise((resolve, reject) => {
@@ -277,12 +279,12 @@ app.post("/posts/create",async (req,res)=>{
                 };
             });
         });
+        console.log(req.body.postTitle);
         const post = await new Promise((resolve,reject) => {
             connection.query("SELECT * FROM posts WHERE post_title = ?",req.body.postTitle,(queryErr,queryRes) => {
                 if(queryErr){
                     console.log(queryErr);
                     reject(queryErr);
-                    res.status(500).send("Internal Server Error");
                 } else {
                     resolve(queryRes[0]);
                 };
@@ -304,7 +306,6 @@ app.post("/posts/create",async (req,res)=>{
         });
     } catch(error) {
         console.log(error);
-        res.status(500).send("Internal Server error");
     };
 });
 
@@ -325,21 +326,22 @@ app.get("/posts/get",async (req,res)=>{
         const query = `
         SELECT users.username AS author, posts.post_title,posts.post_content,posts.created_at
         FROM posts
-        INNER JOIN users ON posts.author_id = users.user_id;`
+        INNER JOIN users ON posts.author_id = users.user_id
+        ORDER BY created_at DESC;`
         const posts = await new Promise((resolve,reject)=> {
             connection.query(query,(queryErr,queryRes)=>{
                 if(queryErr){
                     console.log(queryErr);
-                    reject(queryErr);
                     res.status(500).send();
+                    reject(queryErr);                   
                 } else {
                     resolve(queryRes);
                 };
             });
+            connection.release();
         });
 
-        res.json(posts);
-        res.status(200).send();
+        res.status(200).json(posts);
     } catch(error) {
         console.log(error);
         res.status(500).send();
