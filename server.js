@@ -5,7 +5,7 @@
 //-------------------------------------------------------------------[HEADER/BOILERPLATE CODE]--------------------------------------------------------------------------------------------
 
 //loading configuration file to access data as environemnt variables
-require("dotenv").config()
+require("dotenv").config();
 
 //importing modules for server operation
 const express = require("express");
