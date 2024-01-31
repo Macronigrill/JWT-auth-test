@@ -8,7 +8,7 @@ function init() {
     const postTemplate = postContainer.querySelectorAll("div.post")[0].cloneNode(true);
     postContainer.querySelectorAll("div.post")[0].remove();
     
-    fetch("/user/checkauth")
+    fetch("/user/getAuth")
     .then(response => response.json())
     .then(data => {
         console.log(data.user);
@@ -27,15 +27,31 @@ function init() {
     })
 };
 
-function constructPosts(postTemplate,posts){
+async function constructPosts(postTemplate,posts){
+    const user_data = await fetch("/user/getAuth")
+        .then(response => response.json())
+    console.log(user_data);
+    posts.author_id = user_data.id;
+    
     posts.forEach(postData => {
         post = postTemplate.cloneNode(true);
         author = post.querySelectorAll("p")[0];
         title = post.querySelectorAll("p")[1];
         content = post.querySelectorAll("p")[2];
+        delButton = post.querySelectorAll("button")[0];
         author.textContent = "posted by " + postData.author;
         title.textContent = postData.post_title;
         content.textContent = postData.post_content;
+        if (postData.author_id == posts.author_id) {
+            delButton.addEventListener("click",()=>{
+                fetch(`/posts/delete?title=${postData.post_title}`,{method: "DELETE"})
+                .then(response => response.json())
+                .then(location.reload());
+            })
+        } else {
+            post.removeChild(delButton);
+        }
+
         postContainer.appendChild(post);
     });
 };

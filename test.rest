@@ -1,0 +1,13 @@
+GET http://192.168.5.141:80/posts/get
+
+###
+DELETE http://192.168.5.141:80/posts/delete?title=halo
+
+###
+POST http://192.168.5.141:80/user/login
+Content-Type: application/json
+
+{
+    "username":"testuser",
+    "password":"test"
+}

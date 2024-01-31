@@ -255,9 +255,10 @@ app.delete("/user/logout",async(req,res)=>{
 })
 
 //Endpoint for client to check if theyre authenticated
-app.get("/user/checkauth", async (req,res)=>{ 
+app.get("/user/getAuth", async (req,res)=>{ 
     if(req.user){    
-        res.json({user: req.user.username});
+        console.log(req.user);
+        res.json({user: req.user.username,id:req.user.sub});
     } else {
         res.status(401).send();
     }
@@ -341,7 +342,7 @@ app.get("/posts/get",async (req,res)=>{
             });
         });
         const query = `
-        SELECT users.username AS author, posts.post_title,posts.post_content,posts.created_at
+        SELECT users.username AS author, users.user_id AS author_id, posts.post_title, posts.post_content, posts.created_at
         FROM posts
         INNER JOIN users ON posts.author_id = users.user_id
         ORDER BY created_at DESC;`
@@ -362,6 +363,64 @@ app.get("/posts/get",async (req,res)=>{
     } catch(error) {
         console.log(error);
         res.status(500).send();
+    }
+});
+
+//Endpoint for deleting posts made by user
+app.delete("/posts/delete",async (req,res)=>{
+    if(!req.user) {
+        res.status(401).send("Not Auhtorized");
+        return;
+    };
+    if(!req.query || !req.query.title) {
+        res.status(400).send("Bad request");
+        return;
+    }
+    try {
+        const connection = await new Promise((resolve, reject) => {
+            pool.getConnection((err, connection) => {
+                if(err){
+                    console.log("Error getting connection:",err);
+                    reject(err);
+                    res.status(500).send("Internal Server Error");
+                } else {
+                    resolve(connection);
+                };
+            });
+        });
+        var query = `SELECT * FROM posts WHERE post_title = ?`
+        const value = req.query.title;
+        const post = await new Promise((resolve,reject)=> {
+            connection.query(query,value,(queryErr,queryRes)=>{
+                if(queryErr){
+                    console.log(queryErr);
+                    res.status(500).send();
+                    reject(queryErr);                   
+                } else {
+                    resolve(queryRes);
+                };
+            });
+        });
+        if (post[0].author_id != req.user.sub) {
+            res.status(401).send("Unauthorized")
+            return;
+        } else {
+            query = `DELETE FROM posts WHERE post_title = ?`
+            connection.query(query,value,(queryErr,queryRes)=>{
+                if(queryErr){
+                    console.log(queryErr);
+                    res.status(500).send();
+                    return;
+                } else {
+                    res.status(200).send("Post Deleted");
+                    return;
+                }
+            });
+        };
+        
+    } catch(error) {
+        console.log(error);
+        res.status(500).send()
     }
 });
 
